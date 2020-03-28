@@ -19,14 +19,9 @@ See [App.svelte](https://github.com/russellgoldenberg/layercake-responsive/blob/
 
 <script>
   import { LayerCake, Svg } from "layercake";
-  import Scatter from "./Scatter.svelte";
-
-  const RATIO = 2;
   let chartW;
-
-  $: chartH = Math.floor(chartW / RATIO);
+  $: chartH = Math.floor(chartW / 2);
   $: visible = !!chartW;
-
 </script>
 
 <figure class:visible style="height: {chartH}px;" bind:clientWidth="{chartW}">
