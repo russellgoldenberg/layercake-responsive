@@ -1,6 +1,12 @@
 <style>
+  h1 {
+    margin: 1rem auto;
+    text-align: center;
+  }
   figure {
-    width: 33%;
+    max-width: 800px;
+    width: 50%;
+    margin: 0 auto;
     background: pink;
     visibility: hidden;
   }
@@ -27,6 +33,7 @@
   const data = [{ x: 0, y: 0 }, { x: 1, y: 1 }, { x: 2, y: 2 }];
 </script>
 
+<h1>LayerCake Responsive Pattern</h1>
 <figure class:visible style="height: {chartH}px;" bind:clientWidth="{chartW}">
   {#if visible}
     <LayerCake

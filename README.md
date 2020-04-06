@@ -9,7 +9,7 @@ See [App.svelte](https://github.com/russellgoldenberg/layercake-responsive/blob/
 ```svelte
 <style>
   figure {
-    width: 33%;
+    width: 50%;
     visibility: hidden;
   }
   figure.visible {

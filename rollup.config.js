@@ -1,22 +1,14 @@
-import svelte from "rollup-plugin-svelte-hot";
-import sveltePreprocess from "svelte-preprocess";
+import svelte from "rollup-plugin-svelte";
 import resolve from "@rollup/plugin-node-resolve";
 import commonjs from "@rollup/plugin-commonjs";
 import livereload from "rollup-plugin-livereload";
-import svg from "rollup-plugin-svg";
+import { terser } from "rollup-plugin-terser";
+import sveltePreprocess from "svelte-preprocess";
 import json from "@rollup/plugin-json";
 import dsv from "@rollup/plugin-dsv";
-import hmr, { autoCreate } from "rollup-plugin-hot";
 
-const watch = !!process.env.ROLLUP_WATCH;
-const useLiveReload = !!process.env.LIVERELOAD;
-
-const dev = watch || useLiveReload;
-
-const hot = watch && !useLiveReload;
-
+const production = !process.env.ROLLUP_WATCH;
 const preprocess = sveltePreprocess({
-  scss: true,
   postcss: {
     plugins: [require("autoprefixer")]
   }
@@ -32,39 +24,39 @@ export default {
   },
   plugins: [
     svelte({
-      dev: dev,
-      ...(!hot && {
-        css: css => {
-          css.write("public/build/bundle.css");
-        }
-      }),
-      hot: hot && {
-        optimistic: true,
-        noPreserveState: false
-      },
-      preprocess
+      // enable run-time checks when not in production
+      dev: !production,
+      // we'll extract any component CSS out into
+      // a separate file - better for performance
+      css: css => {
+        css.write("public/build/bundle.css");
+      }
     }),
+
+    // If you have external dependencies installed from
+    // npm, you'll most likely need these plugins. In
+    // some cases you'll need additional configuration -
+    // consult the documentation for details:
+    // https://github.com/rollup/plugins/tree/master/packages/commonjs
     resolve({
-      browser: true
+      browser: true,
+      dedupe: ["svelte"]
     }),
     commonjs(),
-
-    dev && serve(),
-    useLiveReload && livereload("public"),
-    hot &&
-      autoCreate({
-        include: "src/**/*",
-        recreate: true
-      }),
-
-    hmr({
-      public: "public",
-      inMemory: true,
-      compatModuleHot: !hot
-    }),
     json(),
     dsv(),
-    svg()
+
+    // In dev mode, call `npm run start` once
+    // the bundle has been generated
+    !production && serve(),
+
+    // Watch the `public` directory and refresh the
+    // browser on changes when not in production
+    !production && livereload("public"),
+
+    // If we're building for production (npm run build
+    // instead of npm run dev), minify
+    production && terser()
   ],
   watch: {
     clearScreen: false
@@ -73,13 +65,13 @@ export default {
 
 function serve() {
   let started = false;
+
   return {
-    name: "svelte/template:serve",
     writeBundle() {
       if (!started) {
         started = true;
-        const flags = ["run", "start", "--", "--dev"];
-        require("child_process").spawn("npm", flags, {
+
+        require("child_process").spawn("npm", ["run", "start", "--", "--dev"], {
           stdio: ["ignore", "inherit", "inherit"],
           shell: true
         });
